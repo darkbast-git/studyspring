@@ -2,8 +2,8 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="E:/workspace_svn/lib/jaxb-api-2.3.1.jar"/>
-	<classpathentry kind="lib" path="E:/workspace_svn/lib/mybatis-3.5.3.jar"/>
 	<classpathentry kind="lib" path="E:/workspace_svn/lib/mysql-connector-java-5.1.25.jar"/>
+	<classpathentry kind="lib" path="E:/workspace_svn/lib/mybatis-3.5.3.jar"/>
+	<classpathentry kind="lib" path="E:/workspace_svn/lib/jaxb-api-2.3.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
