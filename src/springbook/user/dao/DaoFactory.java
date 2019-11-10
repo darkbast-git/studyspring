@@ -2,7 +2,15 @@ package springbook.user.dao;
 
 import java.sql.SQLException;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+// 설정을 담당하는 오브젝트
+@Configuration
 public class DaoFactory {
+	
+	// 오브젝트 생성을 담당
+	@Bean
 	public UserDao userDao() throws ClassNotFoundException, SQLException{
 		UserDao userDao = new UserDao(getConnectionMaker());
 		return userDao;
