@@ -1,12 +1,14 @@
 package test.springbook;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
 import java.sql.SQLException;
 
-import static org.hamcrest.CoreMatchers.is;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 import springbook.user.dao.UserDao;
 import springbook.user.domain.User;
@@ -72,5 +74,17 @@ public class UserDaoTest {
 		dao.add(user3);
 		assertThat(dao.getCount(), is(3));
 
+	}
+	
+	// get()예외조건에 대한 테스트
+	@Test(expected=EmptyResultDataAccessException.class)
+	public void getUserFailure() throws Exception{
+		ApplicationContext context = 
+				new GenericXmlApplicationContext("applicationContext.xml");
+		UserDao dao = context.getBean("userDao", UserDao.class);
+		dao.deleteAll();
+		assertThat(dao.getCount(), is(0));
+		
+		User user = dao.get("unknown");
 	}
 }
