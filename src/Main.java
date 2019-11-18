@@ -7,7 +7,7 @@ import springbook.user.domain.User;
 public class Main {
 
 	public static void main(String[] args) throws ClassNotFoundException, SQLException{
-		UserDao dao = new DaoFactory().userDao();
+		UserDao dao = new UserDao();
 		
 		User user = new User();
 		user.setId("whiteship2");

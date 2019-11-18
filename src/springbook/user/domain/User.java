@@ -5,6 +5,15 @@ public class User {
 	String name;
 	String password;
 	
+	public User(){}
+	
+	// 초기 설정을 간단하게 하기 위해 추가
+	public User(String id, String name, String password){
+		this.id = id;
+		this.name = name;
+		this.password = password;
+	}
+	
 	public String getId() {
 		return id;
 	}
