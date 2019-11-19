@@ -7,14 +7,23 @@ import java.sql.SQLException;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.jta.SpringJtaSynchronizationAdapter;
 
 import springbook.user.dao.UserDao;
 import springbook.user.domain.User;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations="/applicationContext.xml")
 public class UserDaoTest {
+	@Autowired
+	private ApplicationContext context;
 	private UserDao dao;
 	private User user1;
 	private User user2;
@@ -22,12 +31,10 @@ public class UserDaoTest {
 	
 	@Before
 	public void setUp(){
-		ApplicationContext context = 
-				new GenericXmlApplicationContext("applicationContext.xml");
-		this.dao = context.getBean("userDao", UserDao.class);
 		this.user1 = new User("1","N1","P1");
 		this.user2 = new User("2","N2","P2");
 		this.user3 = new User("3","N3","P3");
+		this.dao = context.getBean("userDao",UserDao.class);
 	}
 	
 	@Test
@@ -57,10 +64,6 @@ public class UserDaoTest {
 	
 	@Test
 	public void count() throws Exception{
-		
-//		User user1 = new User("1","N1","P1");
-//		User user2 = new User("2","N2","P2");
-//		User user3 = new User("3","N3","P3");
 		
 		dao.deleteAll();
 		assertThat(dao.getCount(), is(0));
