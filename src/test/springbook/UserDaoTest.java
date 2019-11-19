@@ -22,8 +22,8 @@ import springbook.user.domain.User;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations="/applicationContext.xml")
 public class UserDaoTest {
+//	private ApplicationContext context;
 	@Autowired
-	private ApplicationContext context;
 	private UserDao dao;
 	private User user1;
 	private User user2;
@@ -34,7 +34,7 @@ public class UserDaoTest {
 		this.user1 = new User("1","N1","P1");
 		this.user2 = new User("2","N2","P2");
 		this.user3 = new User("3","N3","P3");
-		this.dao = context.getBean("userDao",UserDao.class);
+//		this.dao = context.getBean("userDao",UserDao.class);
 	}
 	
 	@Test
