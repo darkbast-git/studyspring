@@ -20,7 +20,7 @@ import springbook.user.dao.UserDao;
 import springbook.user.domain.User;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations="/applicationContext.xml")
+@ContextConfiguration(locations="/test-applicationContext.xml")
 public class UserDaoTest {
 //	private ApplicationContext context;
 	@Autowired
