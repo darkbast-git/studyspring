@@ -7,6 +7,7 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import org.apache.ibatis.session.SqlSessionException;
 import org.springframework.dao.EmptyResultDataAccessException;
 
 import springbook.user.domain.User;
@@ -84,18 +85,33 @@ public class UserDao {
 	}
 	
 	public int getCount() throws SQLException{
-		Connection c = dataSource.getConnection();
+		Connection c = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
 		
-		PreparedStatement ps = c.prepareStatement("select count(*) from users");
-		
-		ResultSet rs = ps.executeQuery();
-		rs.next();
-		int count = rs.getInt(1);
-		
-		rs.close();
-		ps.close();
-		c.close();
-		
-		return count;
+		// JDBC try/catch/finally 코드의 문제점
+		// DB연결이 일어날때 마다 반복적으로 발생하므로, 동일처리를 매번 반복해야함.
+		try{
+			c = dataSource.getConnection();
+			ps = c.prepareStatement("select count(*) from users");
+			rs = ps.executeQuery();
+			return rs.getInt(1);
+		}catch(SQLException e){
+			throw e;
+		}finally {
+			if(rs != null){
+				try{
+					rs.close();
+				}catch(SQLException e){
+				}
+			}
+			
+			if (c != null){
+				try{
+					c.close();
+				}catch(SQLException e){
+				}
+			}
+		}
 	}
 }
