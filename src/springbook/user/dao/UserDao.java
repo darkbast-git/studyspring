@@ -7,7 +7,6 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import org.apache.ibatis.session.SqlSessionException;
 import org.springframework.dao.EmptyResultDataAccessException;
 
 import springbook.user.domain.User;
@@ -19,18 +18,102 @@ public class UserDao {
 		this.dataSource = dataSource;
 	}
 
+	/*
+	 * 내부클래스를 사용하는 방법
+	 */
 	public void add(User user) throws ClassNotFoundException, SQLException{
-		Connection c = dataSource.getConnection();
-		PreparedStatement ps = c.prepareStatement(
-				"insert into users(id, name, password) values(?,?,?)");
-		ps.setString(1, user.getId());
-		ps.setString(2, user.getName());
-		ps.setString(3, user.getPassword());
+		class AddStatement implements StatementStrategy{
+			private User user;
+			public AddStatement(User user){
+				this.user = user;
+			}
 
-		ps.executeUpdate();
-
-		ps.close();
-		c.close();
+			public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
+				PreparedStatement ps = c.prepareStatement(
+						"insert into users(id, name, password) values(?,?,?)");
+				ps.setString(1, user.getId());
+				ps.setString(2, user.getName());
+				ps.setString(3, user.getPassword());
+				return ps;
+			}
+		}
+		
+		StatementStrategy st = new AddStatement(user);
+		jdbcContextWithStatementStrategy(st);
+	}
+	
+	/**
+	 * final User를 사용에 외부변수를 내부변수에 전달
+	 */
+	public void add2(final User user) throws ClassNotFoundException, SQLException{
+		class AddStatement implements StatementStrategy{
+			public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
+				PreparedStatement ps = c.prepareStatement(
+						"insert into users(id, name, password) values(?,?,?)");
+				ps.setString(1, user.getId());
+				ps.setString(2, user.getName());
+				ps.setString(3, user.getPassword());
+				return ps;
+			}
+		}
+		
+		StatementStrategy st = new AddStatement();
+		jdbcContextWithStatementStrategy(st);
+	}
+	
+	/**
+	 * 익명 내부 클래스
+	 */
+	public void add3(final User user) throws ClassNotFoundException, SQLException{
+		class AddStatement implements StatementStrategy{
+			public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
+				PreparedStatement ps = c.prepareStatement(
+						"insert into users(id, name, password) values(?,?,?)");
+				ps.setString(1, user.getId());
+				ps.setString(2, user.getName());
+				ps.setString(3, user.getPassword());
+				return ps;
+			}
+		}
+		
+		StatementStrategy st = new AddStatement();
+		jdbcContextWithStatementStrategy(st);
+	}
+	
+	/**
+	 * 익명 내부 클래스
+	 */
+	public void add4(final User user) throws ClassNotFoundException, SQLException{
+		StatementStrategy st = new StatementStrategy() {
+			@Override
+			public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
+				PreparedStatement ps = c.prepareStatement(
+						"insert into users(id, name, password) values(?,?,?)");
+				ps.setString(1, user.getId());
+				ps.setString(2, user.getName());
+				ps.setString(3, user.getPassword());
+				return ps;
+			}
+		};
+		
+		jdbcContextWithStatementStrategy(st);
+	}
+	
+	/**
+	 * 익명 내부 클래스
+	 */
+	public void add5(final User user) throws ClassNotFoundException, SQLException{
+		jdbcContextWithStatementStrategy(new StatementStrategy() {
+			@Override
+			public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
+				PreparedStatement ps = c.prepareStatement(
+						"insert into users(id, name, password) values(?,?,?)");
+				ps.setString(1, user.getId());
+				ps.setString(2, user.getName());
+				ps.setString(3, user.getPassword());
+				return ps;
+			}
+		});
 	}
 
 	public User get(String id) throws ClassNotFoundException, SQLException{
@@ -58,31 +141,21 @@ public class UserDao {
 
 		return user;
 	}
+	
 
 	public void deleteAll() throws SQLException{
-		Connection c = dataSource.getConnection();
-		PreparedStatement ps = null;
+		jdbcContextWithStatementStrategy(new StatementStrategy() {
+			
+			@Override
+			public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
+				PreparedStatement ps = c.prepareStatement(
+						"delete from users");
+				return ps;
+			}
+		});
 		
-		try{
-			StatementStrategy strategy = new DeleteAllStatment();
-			ps = strategy.makePreparedStatement(c);
-			ps.executeUpdate();
-
-		}catch(SQLException e){
-			throw e;
-		}finally {
-			if (ps != null){
-				try{
-					ps.close();
-				}catch(SQLException e){}
-			}
-			if (c != null){
-				try{
-					c.close();
-				}catch(SQLException e){}
-			}
-		}
 	}
+	
 	
 	public int getCount() throws SQLException{
 		Connection c = null;
@@ -112,6 +185,22 @@ public class UserDao {
 				}catch(SQLException e){
 				}
 			}
+		}
+	}
+	
+	public void jdbcContextWithStatementStrategy(StatementStrategy stmt) throws SQLException{
+		Connection c = null;
+		PreparedStatement ps = null;
+		
+		try{
+			c = dataSource.getConnection();
+			ps = stmt.makePreparedStatement(c);
+			ps.executeUpdate();
+		}catch(SQLException e){
+			throw e;
+		}finally {
+			if(ps != null) { try{ ps.close(); }catch(SQLException e){} }
+			if(c != null) { try{ c.close(); }catch(SQLException e){} }
 		}
 	}
 }
