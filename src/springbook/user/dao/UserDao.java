@@ -12,21 +12,19 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import springbook.user.domain.User;
 
 public class UserDao {
-	private DataSource dataSource;
-		
-	public void setDataSource(DataSource dataSource){
-		this.dataSource = dataSource;
-	}
 
+	private JdbcContext jdbcContext;
+	
+	public void setJdbcContext(JdbcContext jdbcContext){
+		this.jdbcContext = jdbcContext;
+	}
+	
 	/*
 	 * 내부클래스를 사용하는 방법
 	 */
 	public void add(User user) throws ClassNotFoundException, SQLException{
-		class AddStatement implements StatementStrategy{
-			private User user;
-			public AddStatement(User user){
-				this.user = user;
-			}
+		
+		this.jdbcContext.workWithStatementStrategy(new StatementStrategy(){
 
 			public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
 				PreparedStatement ps = c.prepareStatement(
@@ -36,17 +34,14 @@ public class UserDao {
 				ps.setString(3, user.getPassword());
 				return ps;
 			}
-		}
-		
-		StatementStrategy st = new AddStatement(user);
-		jdbcContextWithStatementStrategy(st);
+		});
 	}
 	
 	/**
 	 * final User를 사용에 외부변수를 내부변수에 전달
 	 */
 	public void add2(final User user) throws ClassNotFoundException, SQLException{
-		class AddStatement implements StatementStrategy{
+		this.jdbcContext.workWithStatementStrategy(new StatementStrategy(){
 			public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
 				PreparedStatement ps = c.prepareStatement(
 						"insert into users(id, name, password) values(?,?,?)");
@@ -55,17 +50,15 @@ public class UserDao {
 				ps.setString(3, user.getPassword());
 				return ps;
 			}
-		}
-		
-		StatementStrategy st = new AddStatement();
-		jdbcContextWithStatementStrategy(st);
+		});
+
 	}
 	
 	/**
 	 * 익명 내부 클래스
 	 */
 	public void add3(final User user) throws ClassNotFoundException, SQLException{
-		class AddStatement implements StatementStrategy{
+		this.jdbcContext.workWithStatementStrategy(new StatementStrategy(){
 			public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
 				PreparedStatement ps = c.prepareStatement(
 						"insert into users(id, name, password) values(?,?,?)");
@@ -74,10 +67,7 @@ public class UserDao {
 				ps.setString(3, user.getPassword());
 				return ps;
 			}
-		}
-		
-		StatementStrategy st = new AddStatement();
-		jdbcContextWithStatementStrategy(st);
+		});
 	}
 	
 	/**
@@ -96,14 +86,13 @@ public class UserDao {
 			}
 		};
 		
-		jdbcContextWithStatementStrategy(st);
 	}
 	
 	/**
 	 * 익명 내부 클래스
 	 */
 	public void add5(final User user) throws ClassNotFoundException, SQLException{
-		jdbcContextWithStatementStrategy(new StatementStrategy() {
+		this.jdbcContext.workWithStatementStrategy(new StatementStrategy() {
 			@Override
 			public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
 				PreparedStatement ps = c.prepareStatement(
@@ -116,6 +105,7 @@ public class UserDao {
 		});
 	}
 
+	/*
 	public User get(String id) throws ClassNotFoundException, SQLException{
 		Connection c = dataSource.getConnection();
 		PreparedStatement ps = c.prepareStatement(
@@ -141,10 +131,10 @@ public class UserDao {
 
 		return user;
 	}
-	
+	*/
 
 	public void deleteAll() throws SQLException{
-		jdbcContextWithStatementStrategy(new StatementStrategy() {
+		this.jdbcContext.workWithStatementStrategy(new StatementStrategy() {
 			
 			@Override
 			public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
@@ -157,6 +147,8 @@ public class UserDao {
 	}
 	
 	
+	/*
+	 * UPDATE/DELETE/INSERT형의 대응만 존재
 	public int getCount() throws SQLException{
 		Connection c = null;
 		PreparedStatement ps = null;
@@ -187,7 +179,9 @@ public class UserDao {
 			}
 		}
 	}
+	*/
 	
+	/*
 	public void jdbcContextWithStatementStrategy(StatementStrategy stmt) throws SQLException{
 		Connection c = null;
 		PreparedStatement ps = null;
@@ -203,4 +197,5 @@ public class UserDao {
 			if(c != null) { try{ c.close(); }catch(SQLException e){} }
 		}
 	}
+	*/
 }
